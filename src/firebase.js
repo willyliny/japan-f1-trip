@@ -9,7 +9,6 @@ import {
   query,
   where,
   orderBy,
-  getDoc,
   setDoc,
 } from "firebase/firestore";
 
@@ -36,13 +35,19 @@ export function subscribeExpenses(callback) {
     where("deleted", "==", false),
     orderBy("createdAt", "desc")
   );
-  return onSnapshot(q, (snapshot) => {
-    const expenses = snapshot.docs.map((doc) => ({
-      _docId: doc.id,
-      ...doc.data(),
-    }));
-    callback(expenses);
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const expenses = snapshot.docs.map((d) => ({
+        _docId: d.id,
+        ...d.data(),
+      }));
+      callback(expenses);
+    },
+    (error) => {
+      console.error("Expenses sync error:", error);
+    }
+  );
 }
 
 export async function addExpense(expense) {
@@ -63,15 +68,20 @@ export async function deleteExpense(docId) {
 const settingsRef = doc(db, "settings", "global");
 
 export function subscribeSettings(callback) {
-  return onSnapshot(settingsRef, (snap) => {
-    if (snap.exists()) {
-      callback(snap.data());
-    } else {
-      // Initialize default settings
-      setDoc(settingsRef, { jpyToTwd: 0.22 });
-      callback({ jpyToTwd: 0.22 });
+  return onSnapshot(
+    settingsRef,
+    (snap) => {
+      if (snap.exists()) {
+        callback(snap.data());
+      } else {
+        setDoc(settingsRef, { jpyToTwd: 0.22 });
+        callback({ jpyToTwd: 0.22 });
+      }
+    },
+    (error) => {
+      console.error("Settings sync error:", error);
     }
-  });
+  );
 }
 
 export async function updateSetting(key, value) {
