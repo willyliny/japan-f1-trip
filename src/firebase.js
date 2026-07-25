@@ -8,7 +8,6 @@ import {
   onSnapshot,
   query,
   where,
-  orderBy,
   setDoc,
 } from "firebase/firestore";
 
@@ -25,16 +24,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ─── Expenses (realtime) ────────────────────────────────────
-const expensesRef = collection(db, "expenses");
-
-// Listen to all non-deleted expenses, ordered by creation
-export function subscribeExpenses(callback) {
-  const q = query(
-    expensesRef,
-    where("deleted", "==", false),
-    orderBy("createdAt", "desc")
-  );
+// ─── Expenses (realtime, per-trip collection) ───────────────
+// Note: no orderBy in the query — a where + orderBy combo requires a
+// composite index per collection. We sort client-side instead so new
+// trip collections work out of the box.
+export function subscribeExpenses(collName, onData, onError) {
+  const q = query(collection(db, collName), where("deleted", "==", false));
   return onSnapshot(
     q,
     (snapshot) => {
@@ -42,16 +37,18 @@ export function subscribeExpenses(callback) {
         _docId: d.id,
         ...d.data(),
       }));
-      callback(expenses);
+      expenses.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      onData(expenses);
     },
     (error) => {
       console.error("Expenses sync error:", error);
+      onError?.(error);
     }
   );
 }
 
-export async function addExpense(expense) {
-  await addDoc(expensesRef, {
+export async function addExpense(collName, expense) {
+  await addDoc(collection(db, collName), {
     ...expense,
     deleted: false,
     createdAt: Date.now(),
@@ -59,23 +56,22 @@ export async function addExpense(expense) {
 }
 
 // Soft delete — safe for concurrent use
-export async function deleteExpense(docId) {
-  const ref = doc(db, "expenses", docId);
+export async function deleteExpense(collName, docId) {
+  const ref = doc(db, collName, docId);
   await updateDoc(ref, { deleted: true });
 }
 
-// ─── Settings (realtime) ────────────────────────────────────
-const settingsRef = doc(db, "settings", "global");
-
-export function subscribeSettings(callback) {
+// ─── Settings (realtime, per-trip doc) ──────────────────────
+export function subscribeSettings(docKey, callback, defaultRate = 0.22) {
+  const ref = doc(db, "settings", docKey);
   return onSnapshot(
-    settingsRef,
+    ref,
     (snap) => {
       if (snap.exists()) {
         callback(snap.data());
       } else {
-        setDoc(settingsRef, { jpyToTwd: 0.22 });
-        callback({ jpyToTwd: 0.22 });
+        setDoc(ref, { jpyToTwd: defaultRate });
+        callback({ jpyToTwd: defaultRate });
       }
     },
     (error) => {
@@ -84,6 +80,7 @@ export function subscribeSettings(callback) {
   );
 }
 
-export async function updateSetting(key, value) {
-  await setDoc(settingsRef, { [key]: value }, { merge: true });
+export async function updateSetting(docKey, key, value) {
+  const ref = doc(db, "settings", docKey);
+  await setDoc(ref, { [key]: value }, { merge: true });
 }

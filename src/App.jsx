@@ -8,8 +8,7 @@ import {
 } from "./firebase.js";
 
 const MEMBERS = ["鈺翔", "嘉銘", "承翰", "冠崴", "律豪"];
-const DEFAULT_JPY_TO_TWD = 0.22;
-const ITINERARY = [
+const NAGOYA_ITINERARY = [
   { day:1, date:"3/25 (三)", realDate:"2026-03-25", title:"抵達名古屋", color:"#E8673C", spots:[
     { time:"15:35", name:"中部國際機場 抵達", note:"CX530・入境+領行李約30-40分", lat:34.8584, lng:136.8125, icon:"✈️" },
     { time:"16:45", name:"機場租車 取車", note:"Access Plaza 租車櫃台・7-8人座", lat:34.8584, lng:136.8125, icon:"🚗" },
@@ -74,6 +73,59 @@ const ITINERARY = [
     { time:"16:40", name:"CX531 起飛 ✈️", note:"→ 台灣時間 19:15 抵達桃園", lat:34.8584, lng:136.8125, icon:"✈️" },
   ]},
 ];
+
+const TOKYO_ITINERARY = [
+  { day:1, date:"7/25 (六)", realDate:"2026-07-25", title:"抵達東京・秋葉原 🎮", color:"#E8673C", spots:[
+    { time:"15:40", name:"成田機場 抵達", note:"入境+領行李約40-50分", lat:35.7719, lng:140.3929, icon:"✈️" },
+    { time:"17:10", name:"Skyliner 前往上野", note:"約45分・京成上野站下車", lat:35.7118, lng:139.7745, icon:"🚃" },
+    { time:"18:00", name:"上野住宿 Check-in", note:"放行李休息", lat:35.7106, lng:139.7772, icon:"🏨" },
+    { time:"19:00", name:"秋葉原逛街", note:"電器街・動漫・扭蛋（多數店約20-21點打烊）", lat:35.6984, lng:139.7731, icon:"🎮" },
+    { time:"20:30", name:"秋葉原晚餐", note:"拉麵 / 燒肉 / 丼飯", lat:35.6984, lng:139.7731, icon:"🍽️" },
+    { time:"22:00", name:"回上野飯店", note:"山手線2站", lat:35.7106, lng:139.7772, icon:"🌙" },
+  ]},
+  { day:2, date:"7/26 (日)", realDate:"2026-07-26", title:"淺草 → 晴空塔 → 澀谷", color:"#3C8CE8", spots:[
+    { time:"09:00", name:"淺草寺・雷門", note:"早點去避人潮・仲見世通小吃", lat:35.7148, lng:139.7967, icon:"⛩️" },
+    { time:"11:30", name:"淺草午餐", note:"天婦羅 / 鰻魚飯 / 大黑家", lat:35.7119, lng:139.7963, icon:"🍽️" },
+    { time:"13:00", name:"東京晴空塔", note:"淺草走路20分或電車1站・展望台可預約", lat:35.7101, lng:139.8107, icon:"🗼" },
+    { time:"15:30", name:"前往澀谷", note:"半藏門線直達約30分", lat:35.6595, lng:139.7005, icon:"🚃" },
+    { time:"16:00", name:"忠犬八公＋十字路口", note:"經典打卡點", lat:35.6595, lng:139.7005, icon:"🐕" },
+    { time:"16:30", name:"澀谷逛街", note:"SHIBUYA109 / PARCO / Center街", lat:35.6614, lng:139.6993, icon:"🛍️" },
+    { time:"18:30", name:"SHIBUYA SKY 夜景", note:"⚠️ 熱門需預約・日落時段最搶手", lat:35.6580, lng:139.7016, icon:"🌆" },
+    { time:"20:00", name:"澀谷晚餐", note:"", lat:35.6595, lng:139.7005, icon:"🍽️" },
+    { time:"22:00", name:"回上野", note:"銀座線直達約30分", lat:35.7106, lng:139.7772, icon:"🌙" },
+  ]},
+  { day:3, date:"7/27 (一)", realDate:"2026-07-27", title:"鐮倉一日遊 🌊", color:"#4CAF50", spots:[
+    { time:"08:00", name:"出發前往鐮倉", note:"上野東京線直達約1小時", lat:35.3190, lng:139.5504, icon:"🚃" },
+    { time:"09:30", name:"鶴岡八幡宮", note:"鐮倉最大神社", lat:35.3251, lng:139.5565, icon:"⛩️" },
+    { time:"10:30", name:"小町通", note:"小吃逛街・吻仔魚仙貝", lat:35.3222, lng:139.5505, icon:"🍡" },
+    { time:"12:00", name:"午餐 しらす丼", note:"生吻仔魚丼是鐮倉名物", lat:35.3195, lng:139.5510, icon:"🍽️" },
+    { time:"13:30", name:"江之電 → 鐮倉高校前", note:"灌籃高手平交道打卡", lat:35.3067, lng:139.5013, icon:"🚃" },
+    { time:"15:00", name:"長谷寺・鐮倉大佛", note:"江之電長谷站下車", lat:35.3167, lng:139.5357, icon:"🗿" },
+    { time:"16:30", name:"江之島（體力夠再去）", note:"江之電終點・看海夕陽", lat:35.2990, lng:139.4802, icon:"🏝️" },
+    { time:"18:30", name:"返回東京", note:"約1-1.5小時", lat:35.7106, lng:139.7772, icon:"🚃" },
+    { time:"20:00", name:"晚餐", note:"上野阿美橫町居酒屋", lat:35.7091, lng:139.7745, icon:"🍽️" },
+  ]},
+  { day:4, date:"7/28 (二)", realDate:"2026-07-28", title:"自由活動・回國 ✈️", color:"#607D8B", spots:[
+    { time:"10:00", name:"Check-out・行李寄放", note:"", lat:35.7106, lng:139.7772, icon:"🧳" },
+    { time:"10:30", name:"自由活動", note:"阿美橫町 / 銀座 / 新宿 看大家想逛哪", lat:35.7091, lng:139.7745, icon:"🛍️" },
+    { time:"12:30", name:"午餐", note:"", lat:35.7091, lng:139.7745, icon:"🍽️" },
+    { time:"15:00", name:"取行李・前往機場", note:"Skyliner約45分・時間抓寬鬆", lat:35.7719, lng:140.3929, icon:"🚃" },
+    { time:"17:00", name:"抵達機場・掛行李", note:"", lat:35.7719, lng:140.3929, icon:"🛂" },
+    { time:"18:00", name:"免稅店最後採購", note:"", lat:35.7719, lng:140.3929, icon:"🛍️" },
+    { time:"20:40", name:"起飛回台灣 ✈️", note:"→ 約台灣時間 23:30 抵達桃園", lat:35.7719, lng:140.3929, icon:"✈️" },
+  ]},
+];
+
+// ─── Trips ──────────────────────────────────────────────────
+// Each trip has its own itinerary + its own Firestore collection/settings,
+// so old trips' ledgers stay intact and viewable.
+const TRIPS = [
+  { id:"tokyo2607", switchLabel:"🗼 東京", title:"🗼 東京 4天3夜之旅", subtitle:"7/25 - 7/28 · 4天3夜 · 鈺翔、嘉銘、承翰、冠崴、律豪",
+    itinerary:TOKYO_ITINERARY, expensesColl:"expenses_tokyo2607", settingsDoc:"tokyo2607", defaultRate:0.21 },
+  { id:"nagoya2603", switchLabel:"🏁 名古屋", title:"🇯🇵 名古屋 × 鈴鹿 F1 之旅", subtitle:"3/25 - 3/31 · 7天6夜 · 鈺翔、嘉銘、承翰、冠崴、律豪",
+    itinerary:NAGOYA_ITINERARY, expensesColl:"expenses", settingsDoc:"global", defaultRate:0.22 },
+];
+
 const CATEGORIES = [
   { id:"food", label:"餐飲", icon:"🍽️", color:"#E8673C" }, { id:"transport", label:"交通", icon:"🚃", color:"#3C8CE8" },
   { id:"ticket", label:"門票", icon:"🎫", color:"#9C27B0" }, { id:"shopping", label:"購物", icon:"🛍️", color:"#4CAF50" },
@@ -83,17 +135,17 @@ const CATEGORIES = [
 // ─── Utility ────────────────────────────────────────────────
 function googleMapsUrl(lat,lng){return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;}
 
-function findNextUp(now){
+function findNextUp(now,itinerary){
   const jp=new Date(now.toLocaleString("en-US",{timeZone:"Asia/Tokyo"}));
   const td=`${jp.getFullYear()}-${String(jp.getMonth()+1).padStart(2,'0')}-${String(jp.getDate()).padStart(2,'0')}`;
   const nm=jp.getHours()*60+jp.getMinutes();
-  let di=ITINERARY.findIndex(d=>d.realDate===td);
+  let di=itinerary.findIndex(d=>d.realDate===td);
   if(di===-1){
-    const s=new Date(ITINERARY[0].realDate+"T00:00:00+09:00");
+    const s=new Date(itinerary[0].realDate+"T00:00:00+09:00");
     if(jp<s) return{dayIdx:0,spotIdx:0,status:"before",daysUntil:Math.ceil((s-jp)/864e5)};
-    return{dayIdx:ITINERARY.length-1,spotIdx:-1,status:"after",daysUntil:0};
+    return{dayIdx:itinerary.length-1,spotIdx:-1,status:"after",daysUntil:0};
   }
-  const day=ITINERARY[di];
+  const day=itinerary[di];
   for(let i=0;i<day.spots.length;i++){
     const[h,m]=day.spots[i].time.split(":").map(Number);
     if(h*60+m>nm) return{dayIdx:di,spotIdx:i,status:"during",daysUntil:0};
@@ -226,6 +278,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font
 .header h1{font-size:21px;font-weight:900;letter-spacing:-0.5px;line-height:1.3;}
 .header p{font-size:13px;opacity:0.8;margin-top:4px;}
 .rate-badge{position:absolute;bottom:12px;right:16px;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;cursor:pointer;font-family:var(--font);}
+.trip-badge{display:inline-flex;align-items:center;gap:4px;margin-top:10px;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;cursor:pointer;font-family:var(--font);}
 
 /* ── Countdown / Sync / Tabs ── */
 .countdown-banner{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;font-size:13px;font-weight:600;}
@@ -235,7 +288,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font
 .countdown-pulse{width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.8);}}
 .sync-bar{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;font-size:11px;color:var(--text3);background:var(--surface);border-bottom:1px solid var(--border);}
-.sync-dot{width:6px;height:6px;border-radius:50%;}.sync-dot.ok{background:var(--green);}.sync-dot.live{background:var(--green);animation:pulse 2s infinite;}
+.sync-dot{width:6px;height:6px;border-radius:50%;}.sync-dot.ok{background:var(--green);}.sync-dot.live{background:var(--green);animation:pulse 2s infinite;}.sync-dot.err{background:var(--accent);}
 .tab-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
 .tab{flex:1;padding:14px 0 12px;text-align:center;font-size:13px;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;position:relative;font-family:var(--font);}
 .tab.active{color:var(--text);}.tab.active::after{content:'';position:absolute;bottom:0;left:20%;width:60%;height:2.5px;background:var(--accent);border-radius:2px;}
@@ -355,15 +408,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font
 
 // ─── Components ─────────────────────────────────────────────
 
-function ItineraryTab({nextUp}){
+function ItineraryTab({nextUp,itinerary}){
   const[sel,setSel]=useState(nextUp.dayIdx);
-  const day=ITINERARY[sel];
+  const day=itinerary[sel];
   const ref=useRef(null);
   const isToday=sel===nextUp.dayIdx&&(nextUp.status==="during"||nextUp.status==="during-done");
   useEffect(()=>{if(ref.current&&isToday)setTimeout(()=>ref.current?.scrollIntoView({behavior:"smooth",block:"center"}),400);},[sel,isToday]);
 
   return(<div>
-    <div className="day-scroll">{ITINERARY.map((d,i)=>(
+    <div className="day-scroll">{itinerary.map((d,i)=>(
       <button key={i} className={`day-chip ${i===sel?"active":""}`}
         style={i===sel?{background:d.color,borderColor:d.color,color:"#fff"}:{}}
         onClick={()=>setSel(i)}>
@@ -446,14 +499,10 @@ function ExpenseForm({onSave,onCancel,jpyToTwd}){
   };
 
   const handleToggleMember=(m)=>{
-    setSplitAmong(p=>{
-      const next=p.includes(m)?p.filter(x=>x!==m):[...p,m];
-      // Clean up splitAmounts for removed members
-      if(!next.includes(m)){
-        setSplitAmounts(prev=>{const n={...prev};delete n[m];return n;});
-      }
-      return next;
-    });
+    const next=splitAmong.includes(m)?splitAmong.filter(x=>x!==m):[...splitAmong,m];
+    // Clean up splitAmounts for removed members
+    if(!next.includes(m)) setSplitAmounts(prev=>{const n={...prev};delete n[m];return n;});
+    setSplitAmong(next);
     setError("");
   };
 
@@ -652,7 +701,6 @@ function TransferList({transactions, symbol, cv}){
 
 function SettleTab({expenses, jpyToTwd}){
   const[mode,setMode]=useState("split");
-  const settlement=calcSettlement(expenses, MEMBERS, mode, jpyToTwd);
 
   if(expenses.length===0) return(
     <div className="settle-section">
@@ -663,6 +711,9 @@ function SettleTab({expenses, jpyToTwd}){
 
   const hasJpy=expenses.some(e=>(e.currency||"JPY")==="JPY");
   const hasTwd=expenses.some(e=>(e.currency||"JPY")==="TWD");
+  // Single-currency ledgers have nothing to "split" — fall back to that currency
+  const effMode=mode==="split"&&!(hasJpy&&hasTwd)?(hasTwd?"unified-twd":"unified-jpy"):mode;
+  const settlement=calcSettlement(expenses, MEMBERS, effMode, jpyToTwd);
 
   return(
     <div className="settle-section">
@@ -671,9 +722,9 @@ function SettleTab({expenses, jpyToTwd}){
       </div>
 
       <div className="settle-mode-bar">
-        {hasTwd&&hasJpy&&<button className={`settle-mode-btn ${mode==="split"?"active":""}`} onClick={()=>setMode("split")}>🔀 分幣別</button>}
-        <button className={`settle-mode-btn ${mode==="unified-jpy"?"active":""}`} onClick={()=>setMode("unified-jpy")}>🇯🇵 統一日圓</button>
-        <button className={`settle-mode-btn ${mode==="unified-twd"?"active":""}`} onClick={()=>setMode("unified-twd")}>🇹🇼 統一台幣</button>
+        {hasTwd&&hasJpy&&<button className={`settle-mode-btn ${effMode==="split"?"active":""}`} onClick={()=>setMode("split")}>🔀 分幣別</button>}
+        <button className={`settle-mode-btn ${effMode==="unified-jpy"?"active":""}`} onClick={()=>setMode("unified-jpy")}>🇯🇵 統一日圓</button>
+        <button className={`settle-mode-btn ${effMode==="unified-twd"?"active":""}`} onClick={()=>setMode("unified-twd")}>🇹🇼 統一台幣</button>
       </div>
 
       {settlement.mode==="split" ? (
@@ -738,49 +789,71 @@ function SettleTab({expenses, jpyToTwd}){
 
 export default function App(){
   const[tab,setTab]=useState("itinerary");
+  const[tripId,setTripId]=useState(()=>{
+    const saved=localStorage.getItem("tripId");
+    return TRIPS.some(t=>t.id===saved)?saved:TRIPS[0].id;
+  });
+  const trip=TRIPS.find(t=>t.id===tripId)||TRIPS[0];
+  const otherTrip=TRIPS.find(t=>t.id!==trip.id);
   const[expenses,setExpenses]=useState([]);
-  const[jpyToTwd,setJpyToTwd]=useState(DEFAULT_JPY_TO_TWD);
+  const[jpyToTwd,setJpyToTwd]=useState(trip.defaultRate);
   const[showRate,setShowRate]=useState(false);
-  const[rateInput,setRateInput]=useState(String(DEFAULT_JPY_TO_TWD));
+  const[rateInput,setRateInput]=useState(String(trip.defaultRate));
   const[now,setNow]=useState(new Date());
   const[loading,setLoading]=useState(true);
   const[connected,setConnected]=useState(false);
+  const[syncError,setSyncError]=useState(false);
 
   useEffect(()=>{
-    const unsub1=subscribeExpenses((data)=>{setExpenses(data);setLoading(false);setConnected(true);});
-    const unsub2=subscribeSettings((s)=>{if(s.jpyToTwd){const r=parseFloat(s.jpyToTwd);if(r>0){setJpyToTwd(r);setRateInput(String(r));}}});
+    setLoading(true);setConnected(false);setSyncError(false);setExpenses([]);
+    const t=TRIPS.find(x=>x.id===tripId)||TRIPS[0];
+    setJpyToTwd(t.defaultRate);setRateInput(String(t.defaultRate));
+    const unsub1=subscribeExpenses(t.expensesColl,
+      (data)=>{setExpenses(data);setLoading(false);setConnected(true);setSyncError(false);},
+      ()=>{setLoading(false);setConnected(false);setSyncError(true);});
+    const unsub2=subscribeSettings(t.settingsDoc,(s)=>{if(s.jpyToTwd){const r=parseFloat(s.jpyToTwd);if(r>0){setJpyToTwd(r);setRateInput(String(r));}}},t.defaultRate);
     return()=>{unsub1();unsub2();};
-  },[]);
+  },[tripId]);
 
   useEffect(()=>{const t=setInterval(()=>setNow(new Date()),60000);return()=>clearInterval(t);},[]);
 
-  const nextUp=findNextUp(now);
-  const handleAdd=async(exp)=>{await fbAddExpense(exp);};
-  const handleDelete=async(docId)=>{await fbDeleteExpense(docId);};
-  const handleRateSave=async()=>{const v=parseFloat(rateInput);if(v>0&&v<10){setJpyToTwd(v);setShowRate(false);await updateSetting("jpyToTwd",v);}};
+  const switchTrip=()=>{
+    if(!otherTrip) return;
+    localStorage.setItem("tripId",otherTrip.id);
+    setTripId(otherTrip.id);
+  };
+
+  const nextUp=findNextUp(now,trip.itinerary);
+  const handleAdd=async(exp)=>{await fbAddExpense(trip.expensesColl,exp);};
+  const handleDelete=async(docId)=>{await fbDeleteExpense(trip.expensesColl,docId);};
+  const handleRateSave=async()=>{const v=parseFloat(rateInput);if(v>0&&v<10){setJpyToTwd(v);setShowRate(false);await updateSetting(trip.settingsDoc,"jpyToTwd",v);}};
 
   const ctText=nextUp.status==="before"?`✈️ 距離出發還有 ${nextUp.daysUntil} 天！`
-    :nextUp.status==="during"?`📍 下一站：${ITINERARY[nextUp.dayIdx].spots[nextUp.spotIdx].name}`
+    :nextUp.status==="during"?`📍 下一站：${trip.itinerary[nextUp.dayIdx].spots[nextUp.spotIdx].name}`
     :nextUp.status==="during-done"?"✅ 今天行程已結束":"🏠 旅程已結束，辛苦了！";
 
   if(loading) return(<><style>{CSS}</style><div className="loading-overlay"><div className="spinner"/><p style={{marginTop:12,fontSize:13,color:"var(--text2)"}}>連線 Firebase 中...</p></div></>);
 
   return(<><style>{CSS}</style><div className="app">
     <div className="header">
-      <h1>🇯🇵 名古屋 × 鈴鹿 F1 之旅</h1>
-      <p>3/25 - 3/31 · 7天6夜 · 鈺翔、嘉銘、承翰、冠崴、律豪</p>
+      <h1>{trip.title}</h1>
+      <p>{trip.subtitle}</p>
+      {otherTrip&&<button className="trip-badge" onClick={switchTrip}>🔁 切換至 {otherTrip.switchLabel}</button>}
       <button className="rate-badge" onClick={()=>{setRateInput(String(jpyToTwd));setShowRate(true);}}>¥1 = NT${jpyToTwd} ⚙️</button>
     </div>
     <div className={`countdown-banner ${nextUp.status==="before"?"before":nextUp.status==="after"?"after":"during"}`}>
       {nextUp.status==="during"&&<span className="countdown-pulse"/>}{ctText}
     </div>
-    <div className="sync-bar"><div className={`sync-dot ${connected?"live":"ok"}`}/><span>{connected?"🔴 即時同步中":"連線中..."}</span></div>
+    <div className="sync-bar">
+      <div className={`sync-dot ${syncError?"err":connected?"live":"ok"}`}/>
+      <span>{syncError?"⚠️ 同步失敗，請檢查網路後重新整理":connected?"🔴 即時同步中":"連線中..."}</span>
+    </div>
     <div className="tab-bar">
       <button className={`tab ${tab==="itinerary"?"active":""}`} onClick={()=>setTab("itinerary")}><span className="tab-icon">📍</span>行程</button>
       <button className={`tab ${tab==="expense"?"active":""}`} onClick={()=>setTab("expense")}><span className="tab-icon">💴</span>記帳</button>
       <button className={`tab ${tab==="settle"?"active":""}`} onClick={()=>setTab("settle")}><span className="tab-icon">🤝</span>結算</button>
     </div>
-    {tab==="itinerary"&&<ItineraryTab nextUp={nextUp}/>}
+    {tab==="itinerary"&&<ItineraryTab key={trip.id} nextUp={nextUp} itinerary={trip.itinerary}/>}
     {tab==="expense"&&<ExpenseTab expenses={expenses} onAdd={handleAdd} onDelete={handleDelete} jpyToTwd={jpyToTwd}/>}
     {tab==="settle"&&<SettleTab expenses={expenses} jpyToTwd={jpyToTwd}/>}
   </div>
