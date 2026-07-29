@@ -3,6 +3,7 @@ import {
   subscribeExpenses,
   subscribeSettings,
   addExpense as fbAddExpense,
+  updateExpense as fbUpdateExpense,
   deleteExpense as fbDeleteExpense,
   updateSetting,
 } from "./firebase.js";
@@ -368,7 +369,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font
 .expense-cat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .expense-info{flex:1;min-width:0;}.expense-desc{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.expense-meta{font-size:11px;color:var(--text3);margin-top:2px;}
 .expense-amount{font-size:16px;font-weight:900;text-align:right;flex-shrink:0;}.expense-amount .yen{font-size:11px;color:var(--text3);font-weight:500;}
+.item-actions{display:flex;flex-direction:column;gap:2px;flex-shrink:0;}
 .delete-btn{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;opacity:0.5;}.delete-btn:hover{opacity:1;color:var(--accent);}
+.edit-btn{background:none;border:none;font-size:14px;cursor:pointer;padding:4px;opacity:0.5;}.edit-btn:hover{opacity:1;}
 .confirm-delete{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .confirm-delete button{padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);border:none;}
 .confirm-delete .yes{background:var(--accent);color:white;}.confirm-delete .no{background:var(--surface);color:var(--text2);border:1px solid var(--border);}
@@ -446,15 +449,16 @@ function ItineraryTab({nextUp,itinerary}){
   </div>);
 }
 
-function ExpenseForm({onSave,onCancel,jpyToTwd}){
-  const[desc,setDesc]=useState("");
-  const[amount,setAmount]=useState("");
-  const[currency,setCurrency]=useState("JPY");
-  const[paidBy,setPaidBy]=useState(MEMBERS[0]);
-  const[category,setCategory]=useState("food");
-  const[splitAmong,setSplitAmong]=useState([...MEMBERS]);
-  const[splitType,setSplitType]=useState("equal"); // "equal" | "custom"
-  const[splitAmounts,setSplitAmounts]=useState({}); // { memberName: number }
+function ExpenseForm({onSave,onCancel,jpyToTwd,initial}){
+  // `initial` = existing expense → edit mode; prefill from stored values
+  const[desc,setDesc]=useState(initial?.desc||"");
+  const[amount,setAmount]=useState(initial?String(initial.originalAmount||initial.amount):"");
+  const[currency,setCurrency]=useState(initial?.currency||"JPY");
+  const[paidBy,setPaidBy]=useState(initial?.paidBy||MEMBERS[0]);
+  const[category,setCategory]=useState(initial?.category||"food");
+  const[splitAmong,setSplitAmong]=useState(initial?.splitAmong?.length?[...initial.splitAmong]:[...MEMBERS]);
+  const[splitType,setSplitType]=useState(initial?.splitType==="custom"?"custom":"equal"); // "equal" | "custom"
+  const[splitAmounts,setSplitAmounts]=useState(initial?.splitAmounts?{...initial.splitAmounts}:{}); // { memberName: number }
   const[saving,setSaving]=useState(false);
   const[error,setError]=useState("");
   const twdToJpy=1/jpyToTwd;
@@ -481,7 +485,7 @@ function ExpenseForm({onSave,onCancel,jpyToTwd}){
         paidBy,
         category,
         splitAmong,
-        date: new Date().toLocaleDateString("zh-TW"),
+        date: initial?.date||new Date().toLocaleDateString("zh-TW"),
       };
       if(splitType==="custom"){
         // Store custom amounts in original currency, only for selected members with amount > 0
@@ -493,6 +497,10 @@ function ExpenseForm({onSave,onCancel,jpyToTwd}){
         expenseData.splitType="custom";
         expenseData.splitAmounts=cleanAmounts;
         expenseData.splitAmong=Object.keys(cleanAmounts);
+      }else{
+        // Explicitly reset so editing custom → equal clears old custom amounts
+        expenseData.splitType="equal";
+        expenseData.splitAmounts=null;
       }
       await onSave(expenseData);
     }catch(e){console.error(e);}finally{setSaving(false);}
@@ -510,7 +518,7 @@ function ExpenseForm({onSave,onCancel,jpyToTwd}){
     <div className="form-overlay" onClick={onCancel}>
       <div className="form-sheet" onClick={e=>e.stopPropagation()}>
         <div className="form-handle"/>
-        <h3>新增花費 💴</h3>
+        <h3>{initial?"編輯花費 ✏️":"新增花費 💴"}</h3>
         <div className="form-group">
           <label className="form-label">花了什麼</label>
           <input className="form-input" placeholder="例：拉麵午餐" value={desc} onChange={e=>setDesc(e.target.value)}/>
@@ -602,8 +610,9 @@ function ExpenseForm({onSave,onCancel,jpyToTwd}){
   );
 }
 
-function ExpenseTab({expenses,onAdd,onDelete,jpyToTwd}){
+function ExpenseTab({expenses,onAdd,onUpdate,onDelete,jpyToTwd}){
   const[sf,setSf]=useState(false);
+  const[editExp,setEditExp]=useState(null);
   const[confirmId,setConfirmId]=useState(null);
   const totalJpy=expenses.reduce((s,e)=>s+e.amount,0);
   const jpyCount=expenses.filter(e=>(e.currency||"JPY")==="JPY").length;
@@ -652,13 +661,17 @@ function ExpenseTab({expenses,onAdd,onDelete,jpyToTwd}){
                     <button className="yes" onClick={()=>{onDelete(exp._docId);setConfirmId(null);}}>刪除</button>
                     <button className="no" onClick={()=>setConfirmId(null)}>取消</button>
                   </div>)
-                :(<button className="delete-btn" onClick={()=>setConfirmId(exp._docId)}>✕</button>)
+                :(<div className="item-actions">
+                    <button className="edit-btn" onClick={()=>setEditExp(exp)}>✏️</button>
+                    <button className="delete-btn" onClick={()=>setConfirmId(exp._docId)}>✕</button>
+                  </div>)
               }
             </div>
           );
         })}</div>)
       }
       {sf&&<ExpenseForm onSave={async(e)=>{await onAdd(e);setSf(false);}} onCancel={()=>setSf(false)} jpyToTwd={jpyToTwd}/>}
+      {editExp&&<ExpenseForm initial={editExp} onSave={async(e)=>{await onUpdate(editExp._docId,e);setEditExp(null);}} onCancel={()=>setEditExp(null)} jpyToTwd={jpyToTwd}/>}
     </div>
   );
 }
@@ -825,6 +838,7 @@ export default function App(){
 
   const nextUp=findNextUp(now,trip.itinerary);
   const handleAdd=async(exp)=>{await fbAddExpense(trip.expensesColl,exp);};
+  const handleUpdate=async(docId,data)=>{await fbUpdateExpense(trip.expensesColl,docId,data);};
   const handleDelete=async(docId)=>{await fbDeleteExpense(trip.expensesColl,docId);};
   const handleRateSave=async()=>{const v=parseFloat(rateInput);if(v>0&&v<10){setJpyToTwd(v);setShowRate(false);await updateSetting(trip.settingsDoc,"jpyToTwd",v);}};
 
@@ -854,7 +868,7 @@ export default function App(){
       <button className={`tab ${tab==="settle"?"active":""}`} onClick={()=>setTab("settle")}><span className="tab-icon">🤝</span>結算</button>
     </div>
     {tab==="itinerary"&&<ItineraryTab key={trip.id} nextUp={nextUp} itinerary={trip.itinerary}/>}
-    {tab==="expense"&&<ExpenseTab expenses={expenses} onAdd={handleAdd} onDelete={handleDelete} jpyToTwd={jpyToTwd}/>}
+    {tab==="expense"&&<ExpenseTab expenses={expenses} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} jpyToTwd={jpyToTwd}/>}
     {tab==="settle"&&<SettleTab expenses={expenses} jpyToTwd={jpyToTwd}/>}
   </div>
   {showRate&&(

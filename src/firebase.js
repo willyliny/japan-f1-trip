@@ -55,6 +55,11 @@ export async function addExpense(collName, expense) {
   });
 }
 
+export async function updateExpense(collName, docId, data) {
+  const ref = doc(db, collName, docId);
+  await updateDoc(ref, data);
+}
+
 // Soft delete — safe for concurrent use
 export async function deleteExpense(collName, docId) {
   const ref = doc(db, collName, docId);
